@@ -522,7 +522,7 @@ function switchScene(sceneId, yaw, pitch, fov) {
   showUI();
   
   // ★imageHotspots処理（bb001の和傘画像）
-  if (sceneId === "8-bb001") {
+  if (sceneId === "0-aa001") {
     window.umbrellaHotspotCreated = false;  // bb001到達時にフラグをリセット
   }
   
@@ -544,9 +544,9 @@ function switchScene(sceneId, yaw, pitch, fov) {
       // ★和傘クリックでcc001に移動
       img.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (currentSceneObj.data.id === "8-bb001" && window.umbrellaHotspotCreated) {
+        if (currentSceneObj.data.id === "0-aa001" && window.umbrellaHotspotCreated) {
           console.log('🎎 和傘クリック → cc001 に移動');
-          switchScene('26-cc001');
+          switchScene('10-cc001');
         }
       });
       
@@ -583,7 +583,7 @@ function updateUI() {
 
   
   // ★bb001での和傘表示（1回限り、70～110度に到達したら）
-  if (currentSceneObj.data.id === "8-bb001" && !window.umbrellaHotspotCreated) {
+  if (currentSceneObj.data.id === "0-aa001" && !window.umbrellaHotspotCreated) {
     if (yawDeg >= 70 && yawDeg <= 110) {
       window.umbrellaHotspotCreated = true;
       var umbrellaImg = document.querySelector('.image-hotspot');
@@ -825,11 +825,11 @@ function autoStepOnce(isUp,startYaw){if(!autoMoveActive||autoStepping)return;
   autoStepping=true;if(autoZoomInterval){clearInterval(autoZoomInterval);autoZoomInterval=null;}
   var sceneBefore=currentSceneObj;executeMove(isUp);
   if(currentSceneObj===sceneBefore){stopAutoMove();return;}
-  autoStepping=false;startContinuousZoom();}
+  autoStepping=false;if(isUp)startContinuousZoom();}
 function setupArrow(btnId,isUp){var btn=document.getElementById(btnId);
   function onPress(){if(autoMoveActive){stopAutoMove();return;}
     autoMoveTimer=setTimeout(function(){autoMoveTimer=null;autoMoveActive=true;
-      var startYaw=currentView.parameters().yaw;startContinuousZoom();
+      var startYaw=currentView.parameters().yaw;if(isUp)startContinuousZoom();
       autoMoveInterval=setInterval(function(){autoStepOnce(isUp,startYaw);},autoMoveInterval_ms);},500);}
   function onRelease(){if(autoMoveTimer){clearTimeout(autoMoveTimer);autoMoveTimer=null;
     if(!autoMoveActive)executeMove(isUp);}}
