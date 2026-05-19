@@ -131,6 +131,57 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     rgba(0,0,0,0) var(--outerR, 260px)
   );
 }
+
+.portal-hotspot {
+  position: relative;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.portal-hotspot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.portal-hit-area {
+  position: absolute;
+  left: 25%;
+  top: 25%;
+  width: 50%;
+  height: 50%;
+  z-index: 2;
+  cursor: pointer;
+}
+.portal-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  will-change: transform;
+}
+.portal-reveal-cover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("start.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+  pointer-events: none;
+  transform: scale(1.1);
+  transform-origin: 50% 50%;
+}
+
 </style>
 <script src="data.js"></script>
 </head>
@@ -158,9 +209,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   <span id="volumeLabel">VOL</span>
   <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.5">
 </div>
-<div id="speedContainer" class="auto-ctrl"><span class="ctrl-label">速度</span><input type="range" id="speedSlider" class="ctrl-slider" min="1" max="9" step="1" value="5"><span class="ctrl-val" id="speedVal">普通</span></div>
-<div id="zoomContainer" class="auto-ctrl"><span class="ctrl-label">ズーム幅</span><input type="range" id="zoomSlider" class="ctrl-slider" min="1" max="9" step="1" value="1"><span class="ctrl-val" id="zoomVal">ゼロ</span></div>
-<div id="fadeContainer" class="auto-ctrl"><span class="ctrl-label">フェード幅</span><input type="range" id="fadeSlider" class="ctrl-slider" min="1" max="9" step="1" value="3"><span class="ctrl-val" id="fadeVal">小</span></div>
+<div id="speedContainer" class="auto-ctrl"><span class="ctrl-label">速度</span><input type="range" id="speedSlider" class="ctrl-slider" min="1" max="9" step="1" value="6"><span class="ctrl-val" id="speedVal">少し速</span></div>
+<div id="zoomContainer" class="auto-ctrl"><span class="ctrl-label">ズーム幅</span><input type="range" id="zoomSlider" class="ctrl-slider" min="1" max="9" step="1" value="2"><span class="ctrl-val" id="zoomVal">極小</span></div>
+<div id="fadeContainer" class="auto-ctrl"><span class="ctrl-label">フェード幅</span><input type="range" id="fadeSlider" class="ctrl-slider" min="1" max="9" step="1" value="8"><span class="ctrl-val" id="fadeVal">極大</span></div>
 
 <img id="mapButton" src="Map戻り-removebg-preview.png" onclick="goToMap()">
 <div id="counter">1</div>
@@ -172,25 +223,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
 <script src="vendor/marzipano.js"></script>
 <script>
-// ★ポータル設定（portal_app.htmlからの命令に基づいて設定）
-// 複数のポータルに対応（シーンIDを変更するだけで対応可能）
-// ★注意：このテンプレートは空の状態です。portal_app.htmlで設定を生成してください。
-var PORTAL_SETTINGS = [
-  {
-    "sceneId": "1-aa002",
-    "targetScene": "11-cc002",
-    "yawMin": 70,
-    "yawMax": 110,
-    "src": "por.png",
-    "fadeTime": 5,
-    "dispTime": 1000,
-    "width": 1012,
-    "height": 760,
-    "yaw": 1.5708,
-    "pitch": 0,
-    "radius": 800
-  }
-];
+// ポータル画像は data.js の imageHotspots（sourceScene / sceneStartId で出発地に紐付け）
 
 // ========================================
 // ★ 修正案A：URLパラメータ読み込みをIIFE外に移動
@@ -239,6 +272,7 @@ window.greenArrowConfig = {
 // ★ infoHotspot テキスト管理
 window.shownTextScenes = {};   // 表示済みシーンID記録
 window.sceneTextTimer  = null; // フェードアウトタイマー
+var sceneTextScale = 1.6;       // text_generator のプレビューに近づけるための表示倍率
 
 // ★3種類の法則を実装するためのグローバル変数
 window.returnScene = null;                    // 戻り先シーン
@@ -282,6 +316,38 @@ function startViewer() {
 'use strict';
 var Marzipano = window.Marzipano;
 var data = window.APP_DATA;
+
+function sceneIdParts(id) {
+  var match = String(id || '').match(/-([a-zA-Z]+)(\d+)$/);
+  return match ? { course: match[1].toLowerCase(), number: parseInt(match[2], 10) } : null;
+}
+
+function inferScenePosition(sd) {
+  var pos = Number(sd.position);
+  if (Number.isFinite(pos)) return pos;
+  var parts = sceneIdParts(sd.id);
+  return parts && Number.isFinite(parts.number) ? parts.number : 1;
+}
+
+function normalizeSceneDirection(sd) {
+  var dir = String(sd.direction || '').toLowerCase();
+  if (dir === 'main') return 'iki';
+  if (dir === 'iki' || dir === 'left' || dir === 'right' || dir === 'portal') return dir;
+
+  var parts = sceneIdParts(sd.id);
+  if (!parts) return 'iki';
+  if (parts.course === 'bb') return 'left';
+  if (parts.course === 'cc') return 'right';
+  if (parts.course === 'dd') return 'portal';
+  return 'iki';
+}
+
+// Marzipano 標準出力の data.js には position/direction が無いことがあるため、
+// 黄色矢印とカウンターが使う最低限の情報をシーンIDから補完する。
+data.scenes.forEach(function(sd) {
+  sd.position = inferScenePosition(sd);
+  sd.direction = normalizeSceneDirection(sd);
+});
 
 // ★ タイルレベルを自動補正（Marzipano出力の data.js をそのまま使えるようにする）
 // 1024tiles では size > 1024 のレベルは存在しないため除去し、
@@ -359,8 +425,8 @@ data.scenes.forEach(function(sd) {
   var limiter = Marzipano.RectilinearView.limit.traditional(sd.faceSize, 75*Math.PI/180, 120*Math.PI/180);
   var view = new Marzipano.RectilinearView(sd.initialViewParameters, limiter);
   var scene = viewer.createScene({ source: source, geometry: geometry, view: view });
-  var dir = isSideRoute(sd.id) ? (isLeftSide(sd.id) ? 'left' : 'right') : 'iki';
-  scenesData[sd.id] = { scene: scene, view: view, data: Object.assign({}, sd, { direction: dir, position: parseInt(sd.name.replace(/[^0-9]/g, '')) || 1 }) };
+  var dir = sd.direction;
+  scenesData[sd.id] = { scene: scene, view: view, data: Object.assign({}, sd, { direction: dir }) };
 });
 
 function showUI() {
@@ -431,11 +497,153 @@ if (counterEl) {
 document.addEventListener('mousemove', showUI);
 document.addEventListener('touchstart', showUI);
 
-function switchScene(sceneId, yaw, pitch, fov) {
+function angleDiffDeg(a, b) {
+  var diff = a - b;
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  return diff;
+}
+
+function legacyPortalCenterRange(ih) {
+  var ymin = typeof ih.yawMin === 'number' && !isNaN(ih.yawMin) ? ih.yawMin : 0;
+  var ymax = typeof ih.yawMax === 'number' && !isNaN(ih.yawMax) ? ih.yawMax : ymin;
+  var center = normalizeAngle(degToRad((ymin + angleDiffDeg(ymax, ymin) / 2))) * 180 / Math.PI;
+  var range = Math.abs(angleDiffDeg(ymax, ymin)) / 2;
+  return { center: center, range: range };
+}
+
+function portalCenterDeg(ih) {
+  if (typeof ih.yawCenter === 'number' && !isNaN(ih.yawCenter)) return ih.yawCenter;
+  return legacyPortalCenterRange(ih).center;
+}
+
+function portalRangeDeg(ih) {
+  if (typeof ih.yawRange === 'number' && !isNaN(ih.yawRange)) return Math.max(0, ih.yawRange);
+  return legacyPortalCenterRange(ih).range;
+}
+
+function portalPlacementYawRad(ih) {
+  return degToRad(portalCenterDeg(ih));
+}
+
+function isRevealPortal(ih) {
+  var preset = portalEffectPreset(ih);
+  return preset.reveal;
+}
+
+function isGrowPortal(ih) {
+  var preset = portalEffectPreset(ih);
+  return preset.grow;
+}
+
+function portalEffectPreset(ih) {
+  var effect = ih && ih.effect ? ih.effect : 'normal';
+  var presets = {
+    normal:     { reveal: false, grow: false, coverOpacity: 0.5, startScale: 0.88, endScale: 1.25, holdMin: 2500, coverFade: 1200, appearMax: 1800, appearMin: 900 },
+    reveal:     { reveal: true,  grow: false, coverOpacity: 0.34,startScale: 0.88, endScale: 1.25, holdMin: 120, holdMax: 260, coverFade: 520, appearMax: 1300, appearMin: 450 },
+    revealSoft: { reveal: true,  grow: false, coverOpacity: 0.22,startScale: 0.88, endScale: 1.25, holdMin: 80,  holdMax: 180, coverFade: 420, appearMax: 1000, appearMin: 350 },
+    revealLong: { reveal: true,  grow: false, coverOpacity: 0.30,startScale: 0.88, endScale: 1.25, holdMin: 220, holdMax: 420, coverFade: 700, appearMax: 1500, appearMin: 500 },
+    revealSlow: { reveal: true,  grow: false, coverOpacity: 0.26,startScale: 0.88, endScale: 1.25, holdMin: 300, holdMax: 600, coverFade: 850, appearMax: 1700, appearMin: 600 },
+    grow:       { reveal: false, grow: true,  coverOpacity: 0.5, startScale: 0.88, endScale: 1.25, holdMin: 2500, coverFade: 1200, appearMax: 1800, appearMin: 900 },
+    growHalf:   { reveal: false, grow: true,  coverOpacity: 0.5, startScale: 0.94, endScale: 1.12, holdMin: 2500, coverFade: 1200, appearMax: 1800, appearMin: 900 },
+    growTiny:   { reveal: false, grow: true,  coverOpacity: 0.5, startScale: 0.97, endScale: 1.06, holdMin: 2500, coverFade: 1200, appearMax: 1800, appearMin: 900 },
+    revealGrow: { reveal: true,  grow: true,  coverOpacity: 0.34,startScale: 0.88, endScale: 1.25, holdMin: 120, holdMax: 260, coverFade: 520, appearMax: 1300, appearMin: 450 },
+    revealGrowSoft: { reveal: true, grow: true, coverOpacity: 0.22,startScale: 0.94, endScale: 1.12, holdMin: 80, holdMax: 180, coverFade: 420, appearMax: 1000, appearMin: 350 },
+    revealGrowTiny: { reveal: true, grow: true, coverOpacity: 0.22,startScale: 0.97, endScale: 1.06, holdMin: 80, holdMax: 180, coverFade: 420, appearMax: 1000, appearMin: 350 },
+    revealGrowSlow: { reveal: true, grow: true, coverOpacity: 0.26,startScale: 0.94, endScale: 1.12, holdMin: 300, holdMax: 600, coverFade: 850, appearMax: 1700, appearMin: 600 }
+  };
+  return presets[effect] || presets.normal;
+}
+
+function portalFadeMs(ih) {
+  return Math.max(0, (parseFloat(ih.fadeTime) || 0) * 1000);
+}
+
+function portalDispMs(ih) {
+  var value = parseFloat(ih.dispTime);
+  if (!isFinite(value)) return 0;
+  return Math.max(0, value <= 60 ? value * 1000 : value);
+}
+
+function portalStartHoldMs(ih, preset) {
+  var value = parseFloat(ih.startHoldTime);
+  var hold = isFinite(value) ? (value <= 60 ? value * 1000 : value) : 0;
+  hold = Math.max(preset.holdMin, hold);
+  return typeof preset.holdMax === 'number' ? Math.min(hold, preset.holdMax) : hold;
+}
+
+function scaledSceneTextFontSize(fontSize) {
+  var px = parseFloat(fontSize);
+  if (!isFinite(px)) return fontSize || '20px';
+  return Math.round(px * sceneTextScale) + 'px';
+}
+
+function preparePortalMotion(inner, cover, ih, fadeMs) {
+  var preset = portalEffectPreset(ih);
+  inner.style.transitionDuration = Math.max(0, fadeMs) + 'ms';
+  if (preset.grow) {
+    inner.style.transform = 'scale(' + preset.startScale + ')';
+  }
+  if (cover) {
+    cover.style.transition = 'none';
+    cover.style.opacity = String(preset.coverOpacity);
+    cover.getBoundingClientRect();
+    cover.style.transitionProperty = 'opacity';
+    cover.style.transitionTimingFunction = 'ease-in-out';
+    cover.style.transitionDuration = Math.max(0, preset.coverFade) + 'ms';
+  }
+}
+
+function showPortalMotion(inner, cover, ih, zoomMs) {
+  var preset = portalEffectPreset(ih);
+  if (inner && preset.grow) {
+    inner.style.transitionDuration = Math.max(0, zoomMs) + 'ms';
+    inner.style.transform = 'scale(' + preset.endScale + ')';
+  }
+  if (cover) {
+    var holdMs = portalStartHoldMs(ih, preset);
+    setTimeout(function() {
+      cover.style.transitionDuration = Math.max(0, preset.coverFade) + 'ms';
+      cover.style.opacity = '0';
+    }, holdMs);
+  }
+}
+
+function hidePortalMotion(inner, cover, ih) {
+  var preset = portalEffectPreset(ih);
+  if (inner && preset.grow) inner.style.transform = 'scale(' + preset.startScale + ')';
+  if (cover) cover.style.opacity = String(preset.coverOpacity);
+}
+
+// 出発地シーンIDに属する imageHotspots を全シーンから収集（誤って別シーン配下にあっても表示）
+function collectImageHotspotsForScene(sceneId) {
+  var list = [];
+  data.scenes.forEach(function(sd) {
+    if (!sd.imageHotspots) return;
+    sd.imageHotspots.forEach(function(ih) {
+      var logical = ih.sourceScene || ih.sceneStartId || sd.id;
+      if (logical === sceneId) list.push(ih);
+    });
+  });
+  return list;
+}
+
+function switchScene(sceneId, yaw, pitch, fov, fromPortalHotspot) {
   var obj = scenesData[sceneId];
   if (!obj) return;
   
   console.log('🔵 switchScene: sceneId=' + sceneId + ', yaw=' + (yaw !== undefined ? radToDeg(yaw).toFixed(2) + '°' : 'undefined') + ', pitch=' + (pitch !== undefined ? radToDeg(pitch).toFixed(2) + '°' : 'undefined'));
+  
+  // ★hotspot フラグをリセット（新しいシーンで再度表示可能にする）
+  if (window.hotspotImages) {
+    window.hotspotImages = [];
+  }
+  // ★全ての hotspotShown フラグをリセット
+  for (var key in window) {
+    if (key.startsWith('hotspotShown_')) {
+      window[key] = false;
+    }
+  }
   
   currentSceneObj = obj; currentScene = obj.scene; currentView = obj.view;
   
@@ -458,15 +666,10 @@ function switchScene(sceneId, yaw, pitch, fov) {
   
   var targetFov = fov !== undefined ? fov : currentView.parameters().fov;
 
-  // ★ 53-cc001 移動時のフェードイン処理（必ず switchTo() の前に実行）
-  var is53cc001 = (sceneId === '53-cc001');
-  if (is53cc001) {
-    var overlay = document.getElementById('fadeOverlay');
-    overlay.style.opacity = '1';
-    console.log('✨ 53-cc001: オーバーレイを白く表示（switchTo前）');
-  }
-
   var crossfadeDur=(typeof autoMoveActive!=='undefined'&&autoMoveActive)?Math.min(2000,Math.round(autoMoveInterval_ms*autoFadePct)):700;
+  if (fromPortalHotspot) {
+    crossfadeDur = Math.max(crossfadeDur, 1800);
+  }
   currentScene.switchTo({ transitionDuration: crossfadeDur });
 
   // ★修正：switchTo の後に setParameters（穴森神社方式）
@@ -481,16 +684,16 @@ function switchScene(sceneId, yaw, pitch, fov) {
   var _ihs = obj.data.infoHotspots;
   console.log('📝 [infoHotspot診断] sceneId=' + sceneId
     + ' | 件数=' + (_ihs ? _ihs.length : 0)
-    + ' | text=' + (_ihs && _ihs[0] ? _ihs[0].text : 'なし')
+    + ' | text=' + (_ihs && _ihs[0] ? (_ihs[0].text || _ihs[0].title) : 'なし')
     + ' | 既表示=' + !!window.shownTextScenes[sceneId]);
-  if (obj.data.infoHotspots && obj.data.infoHotspots.length > 0 && obj.data.infoHotspots[0].text) {
+  if (obj.data.infoHotspots && obj.data.infoHotspots.length > 0 && (obj.data.infoHotspots[0].text || obj.data.infoHotspots[0].title)) {
     if (!window.shownTextScenes[sceneId]) {
       // このシーンはまだ未表示 → 表示する
       window.shownTextScenes[sceneId] = true;
       var hs = obj.data.infoHotspots[0];
       var hsStyle = hs.style || {};
-      textEl.textContent = hs.text;
-      textEl.style.fontSize = hsStyle.fontSize || '20px';
+      textEl.textContent = hs.text || hs.title;
+      textEl.style.fontSize = scaledSceneTextFontSize(hsStyle.fontSize || '20px');
       textEl.style.fontFamily = hsStyle.fontFamily || 'sans-serif';
       textEl.style.color = hsStyle.color || '#ffffff';
       // pitch → 画面の縦位置（bottom %）
@@ -527,60 +730,80 @@ function switchScene(sceneId, yaw, pitch, fov) {
     textEl.style.display = 'none';
   }
   
-  // ★ 53-cc001: 2秒後にオーバーレイをフェードアウト
-  if (is53cc001) {
-    setTimeout(function() {
-      var overlay = document.getElementById('fadeOverlay');
-      overlay.style.opacity = '0';  // ★ 2秒かけてフェードアウト（CSS transition で自動）
-      console.log('✨ 53-cc001: フェードアウト開始');
-    }, 700);  // ★ switchTo の transitionDuration (700ms) 後に開始
-  }
-  
   if (counterEl) counterEl.textContent = obj.data.position;
   // ★ BGM処理：シーン切り替え時に再生（地図ON/OFF＋長押し状態に従う）
   playSceneBGM(sceneId);
   
   showUI();
   
-  // ★ポータル処理（PORTAL_SETTINGSから設定を読む・汎用化）
-  var portalSetting = PORTAL_SETTINGS.find(function(p) { return p.sceneId === sceneId; });
-  if (portalSetting) {
-    // ポータル到達時にフラグをリセット
-    window.portalHotspotCreated = false;
-    console.log('🎎 ポータル初期化: sceneId=' + sceneId + ', targetScene=' + portalSetting.targetScene);
-    
-    // ポータル画像を作成
-    var img = document.createElement('img');
-    img.src = portalSetting.src;
-    img.className = 'image-hotspot';
-    img.style.cssText = [
-      'width:' + portalSetting.width + 'px',
-      'height:' + portalSetting.height + 'px',
-      'object-fit:cover',
-      'opacity:0',
-      'transition:opacity ' + portalSetting.fadeTime + 's ease-in-out',
-      'cursor:pointer',
-      'pointer-events:none'
-    ].join(';');
-    
-    // ★ポータルクリック時の遷移
-   function handlePortalTap(e) {
-  e.stopPropagation();
-  if (window.portalHotspotCreated) {
-    console.log('🎎 ポータルクリック → ' + portalSetting.targetScene + ' に移動');
-    switchScene(portalSetting.targetScene);
-  }
-}
+  // ★imageHotspots（出発地＝sceneId に紐づくものを全シーンから収集）
+  var portalList = collectImageHotspotsForScene(sceneId);
+  console.log('🔍 [switchScene] sceneId=' + sceneId + ' ポータル件数=' + portalList.length);
+  if (portalList.length > 0) {
+    portalList.forEach(function(ih) {
+      var wrapper = document.createElement('div');
+      var inner = document.createElement('div');
+      var img = document.createElement('img');
+      var hitArea = document.createElement('div');
+      var cover = null;
+      var fadeMs = portalFadeMs(ih);
+      var preset = portalEffectPreset(ih);
+      img.src = ih.src;
+      img.alt = '';
+      img.style.opacity = preset.reveal ? '0' : '1';
+      img.style.transition = 'opacity ' + fadeMs + 'ms ease-in-out';
+      wrapper.className = 'image-hotspot portal-hotspot';
+      wrapper.style.cssText = [
+        'width:' + (ih.width || 400) + 'px',
+        'height:' + (ih.height || 300) + 'px',
+        'opacity:0',
+        'transition:opacity ' + fadeMs + 'ms ease-in-out',
+        'cursor:pointer',
+        'pointer-events:none'
+      ].join(';');
+      inner.className = 'portal-inner';
+      inner.appendChild(img);
+      if (isRevealPortal(ih)) {
+        cover = document.createElement('div');
+        cover.className = 'portal-reveal-cover';
+        inner.appendChild(cover);
+      }
+      hitArea.className = 'portal-hit-area';
+      preparePortalMotion(inner, cover, ih, fadeMs);
+      wrapper.appendChild(inner);
+      wrapper.appendChild(hitArea);
+      
+      // ★hotspot クリック時の遷移
+      hitArea.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var flagKey = 'hotspotShown_' + sceneId + '_' + ih.targetScene;
+        if (window[flagKey]) {
+          console.log('🎎 hotspot クリック → ' + ih.targetScene + ' に移動');
+          switchScene(ih.targetScene, ih.targetYaw, ih.targetPitch, currentView.parameters().fov, true);
+        }
+      });
+      
+      var placeYaw = portalPlacementYawRad(ih);
+      var placePitch = 0;
 
-img.addEventListener('click', handlePortalTap);
-img.addEventListener('touchend', handlePortalTap);
-    
-    // ホットスポット作成
-    currentScene.hotspotContainer().createHotspot(img,
-      { yaw: portalSetting.yaw, pitch: portalSetting.pitch },
-      { perspective: { radius: portalSetting.radius } }
-    );
-    console.log('🎎 ホットスポット作成: ' + portalSetting.src + ' → ' + portalSetting.targetScene);
+      // ★hotspot を VR 空間に配置（中心角度へ。球面 yaw/pitch の個別設定は使わない）
+      currentScene.hotspotContainer().createHotspot(wrapper,
+        { yaw: placeYaw, pitch: placePitch },
+        { perspective: { radius: ih.radius || 800 } }
+      );
+      
+      // ★updateUI で opacity 制御用のグローバル参照を保持
+      if (!window.hotspotImages) window.hotspotImages = [];
+      window.hotspotImages.push({
+        img: wrapper,
+        portalImg: img,
+        inner: inner,
+        cover: cover,
+        ih: ih,
+        sceneId: sceneId,
+        flagKey: 'hotspotShown_' + sceneId + '_' + ih.targetScene
+      });
+    });
   }
 
 }
@@ -608,36 +831,53 @@ function updateUI() {
   document.getElementById('arrowLeft').style.visibility = isVert ? 'hidden' : 'visible';
   document.getElementById('arrowRight').style.visibility = isVert ? 'hidden' : 'visible';
 
-  // ★ポータル画像表示（PORTAL_SETTINGSから角度・タイミング情報を読む）
-  var portalSetting = PORTAL_SETTINGS.find(function(p) { return p.sceneId === currentSceneObj.data.id; });
-  if (portalSetting && !window.portalHotspotCreated) {
-    var yawMin = portalSetting.yawMin;
-    var yawMax = portalSetting.yawMax;
-    var fadeTime = portalSetting.fadeTime;
-    var dispTime = portalSetting.dispTime;
-    var totalTime = (fadeTime * 1000) + dispTime;  // フェード + 表示時間
-    
-    console.log('🎎 ポータル条件チェック: yawDeg=' + yawDeg.toFixed(1) + '°, 範囲=' + yawMin + '～' + yawMax + '°');
-    
-    if (yawDeg >= yawMin && yawDeg <= yawMax) {
-      window.portalHotspotCreated = true;
-      var portalImg = document.querySelector('.image-hotspot');
-      if (portalImg) {
-        // フェードイン開始
-        portalImg.style.opacity = '1';
-        portalImg.style.pointerEvents = 'auto';  // ★クリック有効化
-        console.log('🎎 ポータルフェードイン開始（' + yawMin + '～' + yawMax + '度に到達）');
+  if (window.hotspotImages && window.hotspotImages.length > 0) {
+    window.hotspotImages.forEach(function(hs) {
+      if (currentSceneObj && currentSceneObj.data.id === hs.sceneId && !window[hs.flagKey]) {
+        var center = portalCenterDeg(hs.ih);
+        var range = portalRangeDeg(hs.ih);
+        var inRange = Math.abs(angleDiffDeg(yawDeg, center)) <= range;
         
-        // totalTime 後にフェードアウト開始
-        setTimeout(function() {
-          if (portalImg) {
-            portalImg.style.opacity = '0';
-            portalImg.style.pointerEvents = 'none';  // ★クリック無効化
-            console.log('🎎 ポータルフェードアウト開始');
+        if (inRange) {
+          var fadeMs = portalFadeMs(hs.ih);
+          var dispMs = portalDispMs(hs.ih);
+          var totalTime = fadeMs + dispMs;
+          var preset = portalEffectPreset(hs.ih);
+          var appearMs = fadeMs;
+          var imageDelayMs = preset.reveal ? Math.min(120, Math.round(portalStartHoldMs(hs.ih, preset) * 0.5), Math.max(0, totalTime - appearMs)) : 0;
+          window[hs.flagKey] = true;
+          showPortalMotion(hs.inner, hs.cover, hs.ih, totalTime);
+          hs.img.style.transition = 'opacity ' + appearMs + 'ms ease-in-out';
+          hs.img.style.opacity = '1';
+          hs.img.style.pointerEvents = 'auto';
+          if (hs.portalImg) {
+            hs.portalImg.style.opacity = preset.reveal ? '0' : '1';
+            hs.portalImg.style.transition = 'opacity ' + appearMs + 'ms ease-in-out';
+            setTimeout(function() {
+              if (hs.portalImg) hs.portalImg.style.opacity = '1';
+            }, imageDelayMs);
           }
-        }, totalTime);
+          console.log('🎎 hotspot フェードイン開始: ' + hs.ih.src + ' (fadeTime=' + hs.ih.fadeTime + 's, dispTime=' + dispMs + 'ms → totalTime=' + totalTime + 'ms ≈ ' + (totalTime/1000).toFixed(1) + '秒)');
+          
+          // 自動フェードアウト
+          setTimeout(function() {
+            hidePortalMotion(hs.inner, hs.cover, hs.ih);
+            if (hs.portalImg) hs.portalImg.style.opacity = preset.reveal ? '0' : '1';
+            hs.img.style.opacity = '0';
+            console.log('🎎 hotspot フェードアウト開始: ' + hs.ih.src);
+            setTimeout(function() {
+              hs.img.style.pointerEvents = 'none';
+            }, fadeMs);
+            
+            // ★リセット表示が有効な場合、フラグをリセット（再度フェード可能にする）
+            if (hs.ih.resetDisplay) {
+              window[hs.flagKey] = false;
+              console.log('🔄 hotspot リセット表示有効: 次に表示範囲に入ったら再表示します');
+            }
+          }, totalTime);
+        }
       }
-    }
+    });
   }
 
   // 緑矢印の表示制御（複数脇道対応）
@@ -713,31 +953,52 @@ document.getElementById('fadeSlider').addEventListener('input',function(e){
   var v=parseInt(e.target.value);autoFadePct=fadeToPct(v);
   document.getElementById('fadeVal').textContent=fadeLabels[v]||v;_save('fade',v);
 });
-setTimeout(function(){
-  var s=Math.max(1,Math.min(9,parseInt(_load('speed','5'))));document.getElementById('speedSlider').value=s;autoMoveInterval_ms=speedToMs(s);document.getElementById('speedVal').textContent=speedLabels[s]||s;
-  var z=Math.max(1,Math.min(9,parseInt(_load('zoom','1'))));document.getElementById('zoomSlider').value=z;breathMin=zoomToMin(z);document.getElementById('zoomVal').textContent=zoomLabels[z]||z;
-  var f=Math.max(1,Math.min(9,parseInt(_load('fade','3'))));document.getElementById('fadeSlider').value=f;autoFadePct=fadeToPct(f);document.getElementById('fadeVal').textContent=fadeLabels[f]||f;
-},100);
+applyAutoMoveSettings();
+
+/* ========================================
+   ★統合版：黄色矢印処理
+   2月版のシンプルロジック + 現在版の脇道処理
+======================================== */
+
+function executeMoveByDelta(delta) {
+  if (!currentView || !currentSceneObj) return;
+
+  var nextPos = currentSceneObj.data.position + delta;
+
+  for (var id in scenesData) {
+    if (scenesData[id].data.position === nextPos &&
+        scenesData[id].data.direction === currentSceneObj.data.direction) {
+      switchScene(id, currentView.parameters().yaw, currentView.parameters().pitch);
+      return;
+    }
+  }
+}
 
 function executeMove(isUp) {
   var yaw = normalizeAngle(currentView.parameters().yaw);
   var isLookingFront = Math.abs(radToDeg(yaw)) <= 90;
   
-  // ★特別ケース1（無効化）：7-aa008 → bb001 は「扉クリック」でのみ移動
+  // ★特別ケース1（無効化）：左側コース最初のシーン → 右側コース移動は「扉クリック」でのみ
   
-  // ★特別ケース2：bb001 から aa017 へ（戻る）
-  if (currentSceneObj.data.id === "8-bb001") {
+  // ★特別ケース2：左側コース → main に戻る
+  if (currentSceneObj.data.direction === "left" && currentSceneObj.data.position === 1) {
     var shouldReturn = (isLookingFront && !isUp) || (!isLookingFront && isUp);
     if (shouldReturn) {
-      console.log('🚀 bb001 → aa017 に戻る');
-      switchScene("7-aa008", yaw, currentView.parameters().pitch, currentView.parameters().fov);
-      return;
+      // mainコースで、この左側シーンと対応する位置のシーンを探す
+      var mainScene = window.APP_DATA.scenes.find(s => 
+        s.direction === "main" && s.position === currentSceneObj.data.position
+      );
+      if (mainScene) {
+        console.log('🚀 左側コース → main に戻る: ' + mainScene.id);
+        switchScene(mainScene.id, yaw, currentView.parameters().pitch, currentView.parameters().fov);
+        return;
+      }
     }
   }
   
-  // ★特別ケース3：cc001は終点（戻る機能なし）
-  if (currentSceneObj.data.id === "26-cc001") {
-    console.log('🎎 cc001は終点です。移動できません。');
+  // ★特別ケース4：ポータル専用シーン（脇道処理をスキップ）
+  if (currentSceneObj.data.direction === "portal") {
+    console.log('🎎 ポータル専用シーンです。脇道移動できません。');
     return;
   }
   
@@ -803,28 +1064,25 @@ function executeMove(isUp) {
         var nxtInitYaw = scenesData[id].data.initialViewParameters.yaw;
         var relYaw = normalizeAngle(yaw - curInitYaw);
         var adjustedYaw = normalizeAngle(nxtInitYaw + relYaw);
-        switchScene(id, adjustedYaw, undefined, currentView.parameters().fov);
+        switchScene(id, adjustedYaw, currentView.parameters().pitch, currentView.parameters().fov);
         return;
       }
     }
     return;
   }
 
-  // aa での通常の移動処理
-  var delta = (isLookingFront ? 1 : -1) * (isUp ? 1 : -1);
-  if (flipDir) delta = -delta;
-  var nextPos = currentSceneObj.data.position + delta;
-  for (var id in scenesData) {
-    if (scenesData[id].data.position === nextPos && scenesData[id].data.direction === currentSceneObj.data.direction) {
-      // 相対yaw引き継ぎ：現シーンの初期yawからのズレ分を次シーンの初期yawに加算
-      var curInitYaw = currentSceneObj.data.initialViewParameters.yaw;
-      var nxtInitYaw = scenesData[id].data.initialViewParameters.yaw;
-      var relYaw = normalizeAngle(yaw - curInitYaw);
-      var adjustedYaw = Math.abs(radToDeg(relYaw)) < 15 ? undefined : normalizeAngle(nxtInitYaw + relYaw);
-      switchScene(id, adjustedYaw, undefined, currentView.parameters().fov);
-      return;
-    }
+  // aa での通常の移動処理（黄色矢印）
+  // ★2月版のロジック復元：direction を考慮、executeMoveByDelta使用
+  var delta;
+  if (currentSceneObj.data.direction === 'iki') {
+    // 行きシーン：正面なら進む/下がる、後ろなら下がる/進む
+    delta = isUp ? (isLookingFront ? 1 : -1) : (isLookingFront ? -1 : 1);
+  } else {
+    // 帰りシーン：正面なら下がる/進む、後ろなら進む/下がる
+    delta = isUp ? (isLookingFront ? -1 : 1) : (isLookingFront ? 1 : -1);
   }
+  if (flipDir) delta = -delta;
+  executeMoveByDelta(delta);
 }
 
 // ★ 自動再生（ズームインのみ・黒画面なし）コースごと完全独立保存
@@ -833,11 +1091,25 @@ var breathMax=75,breathMin=75,breathFov=breathMax,autoFadePct=0.175;
 var autoMoveTimer=null,autoMoveInterval=null,autoZoomInterval=null;
 var autoMoveActive=false,autoStepping=false;
 
-// キー：document.title（タイトル）のみを使用 → すべてのフォルダで同じキー
-// ★修正：location.hrefを削除（ローカル/USB間での設定同期を実現）
-function _ck(){return 'ap_'+(document.title).replace(/[^a-zA-Z0-9]/g,'_')+'_';}
+// 自動再生設定は作品を開き直しても勝手に戻らないよう、専用キーで固定保存する。
+function _ck(){return 'marzipano_auto_settings_v3_';}
 function _save(k,v){try{localStorage.setItem(_ck()+k,String(v));}catch(e){}}
 function _load(k,def){try{var v=localStorage.getItem(_ck()+k);return v!==null?v:def;}catch(e){return def;}}
+
+function applyAutoMoveSettings() {
+  var s=Math.max(1,Math.min(9,parseInt(_load('speed','6'))));
+  var z=Math.max(1,Math.min(9,parseInt(_load('zoom','2'))));
+  var f=Math.max(1,Math.min(9,parseInt(_load('fade','8'))));
+  document.getElementById('speedSlider').value=s;
+  autoMoveInterval_ms=speedToMs(s);
+  document.getElementById('speedVal').textContent=speedLabels[s]||s;
+  document.getElementById('zoomSlider').value=z;
+  breathMin=zoomToMin(z);
+  document.getElementById('zoomVal').textContent=zoomLabels[z]||z;
+  document.getElementById('fadeSlider').value=f;
+  autoFadePct=fadeToPct(f);
+  document.getElementById('fadeVal').textContent=fadeLabels[f]||f;
+}
 
 function startContinuousZoom(){
   if(autoZoomInterval){clearInterval(autoZoomInterval);autoZoomInterval=null;}
@@ -856,7 +1128,9 @@ function startContinuousZoom(){
 function stopAutoMove(){if(autoMoveTimer){clearTimeout(autoMoveTimer);autoMoveTimer=null;}
   if(autoMoveInterval){clearInterval(autoMoveInterval);autoMoveInterval=null;}
   if(autoZoomInterval){clearInterval(autoZoomInterval);autoZoomInterval=null;}
-  autoMoveActive=false;autoStepping=false;}
+  autoMoveActive=false;autoStepping=false;
+  breathFov=breathMax;
+  if(currentView)currentView.setParameters({fov:degToRad(breathFov)});}
 function autoStepOnce(isUp,startYaw){if(!autoMoveActive||autoStepping)return;
   if(Math.abs(radToDeg(normalizeAngle(currentView.parameters().yaw-startYaw)))>90){stopAutoMove();return;}
   autoStepping=true;if(autoZoomInterval){clearInterval(autoZoomInterval);autoZoomInterval=null;}
@@ -876,6 +1150,33 @@ function setupArrow(btnId,isUp){var btn=document.getElementById(btnId);
 
 setupArrow('arrowUp', true);
 setupArrow('arrowDown', false);
+
+// ★シンプルな上下矢印処理（pitch保持）
+function executeMoveSimple(isUp) {
+  // ★2月版のロジック復元：direction を考慮
+  if (!currentSceneObj) return;
+  
+  // ★ポータルシーン（dd001）では上下矢印を無効化
+  if (currentSceneObj.data.id === '17-dd001') return;
+  if (currentSceneObj.data.direction === 'portal') return;
+  
+  var yaw = normalizeAngle(currentView.parameters().yaw);
+  var isLookingFront = Math.abs(radToDeg(yaw)) <= 90;
+  
+  var delta;
+  if (currentSceneObj.data.direction === 'iki') {
+    delta = isUp ? (isLookingFront ? 1 : -1) : (isLookingFront ? -1 : 1);
+  } else {
+    delta = isUp ? (isLookingFront ? -1 : 1) : (isLookingFront ? 1 : -1);
+  }
+  
+  executeMoveByDelta(delta);
+}
+
+// クリック時は直接executeMoveSimplifを呼び出す
+// ★上下矢印は setupArrow で処理（click イベントハンドラーは削除）
+
+// 左右矢印と緑矢印のみ click イベント
 document.getElementById('arrowLeft').addEventListener('click', function() {
   if (autoMoveActive) { stopAutoMove(); return; }
   executeSideMove('left');
@@ -903,35 +1204,36 @@ document.getElementById('arrowUpGreen').addEventListener('click', function() {
       }
       
       if (isInRange) {
-        // 進入先を取得
         var targetObj = scenesData[arrow.targetSceneId];
+        if (!targetObj) return;
         var targetInitialYaw = targetObj.data.initialViewParameters.yaw;
-        var departureYaw = currentView.parameters().yaw;  // aa での現在の yaw
-        
-        var newYaw;
-        var yawOff = arrow.yawOffset ? degToRad(arrow.yawOffset) : 0;
-        var pitchOff = arrow.pitchOffset ? degToRad(arrow.pitchOffset) : 0;
-        if (isLeftSide(arrow.targetSceneId)) {
-          newYaw = normalizeAngle(departureYaw + targetInitialYaw + degToRad(90) + yawOff);
-        } else if (isRightSide(arrow.targetSceneId)) {
-          newYaw = normalizeAngle(departureYaw + targetInitialYaw - degToRad(90) + yawOff);
+        var departureYaw = currentView.parameters().yaw;
+        var fromSceneId = currentSceneObj.data.id;
+        var returningToMain = isSideRoute(fromSceneId) && !isSideRoute(arrow.targetSceneId);
+
+        var newYaw = computeGreenArrowTargetYaw(arrow, departureYaw, targetInitialYaw, fromSceneId);
+        var yawOff = arrow.yawOffset ? degToRad(parseFloat(arrow.yawOffset)) : 0;
+        var pitchOff = arrow.pitchOffset ? degToRad(parseFloat(arrow.pitchOffset)) : 0;
+
+        console.log('🟢 GREEN ARROW: ' + fromSceneId + ' → ' + arrow.targetSceneId +
+          ' newYaw: ' + radToDeg(newYaw).toFixed(2) + '°' +
+          (arrow.yawOffset != null ? ' (yawOffset=' + arrow.yawOffset + '°)' : ''));
+
+        if (returningToMain) {
+          window.returnScene = null;
+          window.departureYaw = null;
+          window.departurePitch = null;
+          window.entryInitialYaw = null;
+          window.entryYawOffset = 0;
         } else {
-          newYaw = normalizeAngle(departureYaw + yawOff);
+          window.returnScene = fromSceneId;
+          window.departureYaw = departureYaw;
+          window.departurePitch = currentView.parameters().pitch;
+          window.targetSceneId = arrow.targetSceneId;
+          window.entryInitialYaw = targetInitialYaw;
+          window.entryYawOffset = yawOff;
         }
-        console.log('🟢 GREEN ARROW: Moving to', arrow.targetSceneId, 'newYaw:', radToDeg(newYaw).toFixed(2) + '°');
-        
-        // 戻り用に保存
-        window.returnScene = currentSceneObj.data.id;
-        window.departureYaw = departureYaw;
-        window.departurePitch = currentView.parameters().pitch;  // 戻り時のpitch復元用
-        window.targetSceneId = arrow.targetSceneId;
-        window.entryInitialYaw = targetInitialYaw;
-        window.entryYawOffset = yawOff;  // 戻り時に相殺するため保存
-        
-        console.log('   aa_yaw (deg):', radToDeg(departureYaw).toFixed(2));
-        console.log('   target_initial (deg):', radToDeg(targetInitialYaw).toFixed(2));
-        console.log('   → newYaw (deg):', radToDeg(newYaw).toFixed(2));
-        
+
         switchScene(arrow.targetSceneId, newYaw, currentView.parameters().pitch + pitchOff, currentView.parameters().fov);
         return;
       }
@@ -940,23 +1242,89 @@ document.getElementById('arrowUpGreen').addEventListener('click', function() {
 });
 
 function executeSideMove(dir) {
-  var yaw = radToDeg(normalizeAngle(currentView.parameters().yaw));
-  var delta = (yaw < 0) ? (dir === 'left' ? -1 : 1) : (dir === 'left' ? 1 : -1);
-  if (flipDir) delta = -delta;  // ★ ?flip=1 で方向反転
-  var nextPos = currentSceneObj.data.position + delta;
-  for (var id in scenesData) {
-    if (scenesData[id].data.position === nextPos && scenesData[id].data.direction === currentSceneObj.data.direction) {
-      switchScene(id, currentView.parameters().yaw, currentView.parameters().pitch, currentView.parameters().fov);  // ★yaw/pitch両方保持
-      return;
-    }
+  // ★ポータルシーン（dd001）では左右矢印を無効化
+  if (!currentSceneObj) return;
+  if (currentSceneObj.data.id === '17-dd001') return;
+  if (currentSceneObj.data.direction === 'portal') return;
+  
+  // ★2月版のロジック復元：executeMoveByDelta使用
+  var yaw = normalizeAngle(currentView.parameters().yaw);
+  var delta;
+  if (yaw < 0) {
+    delta = (dir === 'left' ? -1 : 1);
+  } else {
+    delta = (dir === 'left' ? 1 : -1);
   }
+  if (flipDir) delta = -delta;
+  executeMoveByDelta(delta);
 }
 
 function normalizeAngle(a) { while (a > Math.PI) a -= 2*Math.PI; while (a < -Math.PI) a += 2*Math.PI; return a; }
-// 左系(+90°): bb, bb2, dd, ff など / 右系(-90°): cc, cc2, ee, gg など
-function isLeftSide(id) { return /bb|dd|ff|hh/i.test(id); }
-function isRightSide(id) { return /cc|ee|gg|ii/i.test(id); }
-function isSideRoute(id) { return isLeftSide(id) || isRightSide(id); }
+
+// ★ directionベースの判定（汎用化）
+function isLeftSide(id) {
+  var scene = window.APP_DATA.scenes.find(s => s.id === id);
+  return scene && scene.direction === "left";
+}
+function isRightSide(id) {
+  var scene = window.APP_DATA.scenes.find(s => s.id === id);
+  return scene && scene.direction === "right";
+}
+
+// ★ ポータルシーン一覧を動的に構築
+var PORTAL_SCENES = [];
+if (window.APP_DATA && window.APP_DATA.scenes) {
+  window.APP_DATA.scenes.forEach(function(scene) {
+    if (scene.direction === "portal") {
+      PORTAL_SCENES.push(scene.id);
+    }
+  });
+}
+console.log('🔹 PORTAL_SCENES (動的構築):', PORTAL_SCENES);
+
+function isSideRoute(id) { 
+  // ★ポータル専用シーンは脇道から除外
+  var scene = window.APP_DATA.scenes.find(s => s.id === id);
+  if (scene && scene.direction === "portal") return false;
+  return isLeftSide(id) || isRightSide(id); 
+}
+
+// 緑矢印クリック時の到着yawを計算
+// yawOffset は「移動先シーンの初期yawからの角度（度）」として扱う（例: -90 → 正面が-90°）
+function computeGreenArrowTargetYaw(arrow, departureYaw, targetInitialYaw, fromSceneId) {
+  var hasYawOffset = arrow.yawOffset !== undefined && arrow.yawOffset !== null && arrow.yawOffset !== '';
+  var yawOffRad = hasYawOffset ? degToRad(parseFloat(arrow.yawOffset)) : 0;
+
+  // 脇道（bb/cc）→ 本線（aa）へ戻る
+  if (isSideRoute(fromSceneId) && !isSideRoute(arrow.targetSceneId)) {
+    if (hasYawOffset) {
+      return normalizeAngle(targetInitialYaw + yawOffRad);
+    }
+    if (window.departureYaw !== null) {
+      return window.departureYaw;
+    }
+    if (isLeftSide(fromSceneId)) {
+      return normalizeAngle(departureYaw + targetInitialYaw + degToRad(90));
+    }
+    if (isRightSide(fromSceneId)) {
+      return normalizeAngle(departureYaw + targetInitialYaw - degToRad(90));
+    }
+    return departureYaw;
+  }
+
+  // 本線 → 脇道（bb/cc）へ入る
+  if (isLeftSide(arrow.targetSceneId)) {
+    return normalizeAngle(departureYaw + targetInitialYaw + degToRad(90) + yawOffRad);
+  }
+  if (isRightSide(arrow.targetSceneId)) {
+    return normalizeAngle(departureYaw + targetInitialYaw - degToRad(90) + yawOffRad);
+  }
+  if (hasYawOffset) {
+    return normalizeAngle(targetInitialYaw + yawOffRad);
+  }
+  return normalizeAngle(departureYaw + yawOffRad);
+}
+
 function degToRad(d) { return d * Math.PI / 180; }
 function radToDeg(r) { return r * 180 / Math.PI; }
 window.goToMap = function() { location.href = urlParams.get('back') || 'map.html'; };

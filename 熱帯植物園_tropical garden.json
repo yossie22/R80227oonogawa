@@ -1,0 +1,148 @@
+{
+  "lineName": "熱帯植物園",
+  "lineId": "tropical garden",
+  "flipDirection": false,
+  "courses": [
+    {
+      "name": "aa",
+      "dir": "aa",
+      "startScene": 0,
+      "sceneCount": 13,
+      "color": "#e8453c"
+    },
+    {
+      "name": "bb",
+      "dir": "bb",
+      "startScene": 13,
+      "sceneCount": 3,
+      "color": "#0066cc"
+    },
+    {
+      "name": "cc",
+      "dir": "cc",
+      "startScene": 16,
+      "sceneCount": 1,
+      "color": "#27ae60"
+    },
+    {
+      "name": "dd",
+      "dir": "dd",
+      "startScene": 17,
+      "sceneCount": 1,
+      "color": "#ff9900"
+    }
+  ],
+  "pins": [
+    {
+      "courseIndex": 0,
+      "sceneNum": "0-aa001",
+      "lat": 33.190969,
+      "lng": 131.725263,
+      "name": "入り口",
+      "pinColor": "#800040",
+      "flip": false,
+      "greenArrows": [
+        {
+          "sceneId": "10-aa011",
+          "startAngle": -70,
+          "endAngle": -100,
+          "targetSceneId": "13-bb001",
+          "yawOffset": 0,
+          "pitchOffset": 0
+        },
+        {
+          "sceneId": "10-aa011",
+          "startAngle": 50,
+          "endAngle": 80,
+          "targetSceneId": "16-cc001",
+          "yawOffset": 0,
+          "pitchOffset": 0
+        },
+        {
+          "sceneId": "11-aa012",
+          "startAngle": -70,
+          "endAngle": -110,
+          "targetSceneId": "17dd001",
+          "yawOffset": 0,
+          "pitchOffset": 0
+        }
+      ]
+    },
+    {
+      "courseIndex": 1,
+      "sceneNum": "13-bb001",
+      "lat": 33.190466,
+      "lng": 131.72535,
+      "name": "ブーゲンビリア",
+      "pinColor": "#ff80c0",
+      "flip": false,
+      "greenArrows": [
+        {
+          "sceneId": "13-bb001",
+          "startAngle": 100,
+          "endAngle": 130,
+          "targetSceneId": "10-aa011",
+          "yawOffset": 90,
+          "pitchOffset": 0
+        }
+      ]
+    },
+    {
+      "courseIndex": 2,
+      "sceneNum": "16-cc001",
+      "lat": 33.190561,
+      "lng": 131.725291,
+      "name": "中央広場",
+      "pinColor": "#00e600",
+      "flip": false,
+      "greenArrows": [
+        {
+          "sceneId": "16-cc001",
+          "startAngle": 60,
+          "endAngle": 100,
+          "targetSceneId": "10-aa011",
+          "yawOffset": -90,
+          "pitchOffset": 0
+        }
+      ]
+    },
+    {
+      "courseIndex": 3,
+      "sceneNum": "17-dd001",
+      "lat": 33.190619,
+      "lng": 131.725063,
+      "name": "シャクヤク",
+      "pinColor": "#8080ff",
+      "flip": false,
+      "greenArrows": [
+        {
+          "sceneId": "17-dd001",
+          "startAngle": 70,
+          "endAngle": 110,
+          "targetSceneId": "11-aa012",
+          "yawOffset": 90,
+          "pitchOffset": 0
+        }
+      ]
+    }
+  ],
+  "tlLat": "33.190974",
+  "tlLng": "131.724798",
+  "brLat": "33.190432",
+  "brLng": "131.725909",
+  "mainTitle": "佐野植物園",
+  "descText": "マジパン立ち上げテスト用",
+  "mainTitleSize": "53",
+  "mainTitleColor": "#ff0000",
+  "mainTitleShadow": "95",
+  "mainTitleFont": "'Yu Mincho','YuMincho','Hiragino Mincho ProN','MS PMincho',serif",
+  "descSize": "26",
+  "descColor": "#ffff00",
+  "descShadow": "90",
+  "descFont": "'Hiragino Kaku Gothic Pro','Meiryo',sans-serif",
+  "textLeftOffset": "2",
+  "textTopOffset": "3",
+  "textHorizontalPos": "left",
+  "dataJSContent": "var APP_DATA = {\r\n  \"scenes\": [\r\n    {\r\n      \"id\": \"0-aa001\",\r\n      \"name\": \"aa001\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"0-aa001\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 1,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"1-aa002\",\r\n      \"name\": \"aa002\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"1-aa002\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 2,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"2-aa003\",\r\n      \"name\": \"aa003\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"2-aa003\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 3,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"3-aa004\",\r\n      \"name\": \"aa004\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"3-aa004\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 4,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"4-aa005\",\r\n      \"name\": \"aa005\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"4-aa005\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 5,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"5-aa006\",\r\n      \"name\": \"aa006\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"5-aa006\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 6,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"6-aa007\",\r\n      \"name\": \"aa007\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"6-aa007\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 7,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"7-aa008\",\r\n      \"name\": \"aa008\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"7-aa008\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 8,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"8-aa009\",\r\n      \"name\": \"aa009\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"8-aa009\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 9,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"9-aa010\",\r\n      \"name\": \"aa010\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"9-aa010\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 10,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"10-aa011\",\r\n      \"name\": \"aa011\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"10-aa011\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 11,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"11-aa012\",\r\n      \"name\": \"aa012\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"11-aa012\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 12,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"12-aa013\",\r\n      \"name\": \"aa013\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"12-aa013\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 13,\r\n      \"course\": \"aa\"\r\n    },\r\n    {\r\n      \"id\": \"13-bb001\",\r\n      \"name\": \"bb001\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"13-bb001\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 1,\r\n      \"course\": \"bb\"\r\n    },\r\n    {\r\n      \"id\": \"14-bb002\",\r\n      \"name\": \"bb002\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"14-bb002\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 2,\r\n      \"course\": \"bb\"\r\n    },\r\n    {\r\n      \"id\": \"15-bb003\",\r\n      \"name\": \"bb003\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"15-bb003\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 3,\r\n      \"course\": \"bb\"\r\n    },\r\n    {\r\n      \"id\": \"16-cc001\",\r\n      \"name\": \"cc001\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"16-cc001\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 1,\r\n      \"course\": \"cc\"\r\n    },\r\n    {\r\n      \"id\": \"17-dd001\",\r\n      \"name\": \"dd001\",\r\n      \"levels\": [\r\n        {\r\n          \"tileSize\": 256,\r\n          \"size\": 256,\r\n          \"fallbackOnly\": true\r\n        },\r\n        {\r\n          \"tileSize\": 512,\r\n          \"size\": 512\r\n        },\r\n        {\r\n          \"tileSize\": 1024,\r\n          \"size\": 1024\r\n        }\r\n      ],\r\n      \"faceSize\": 2048,\r\n      \"initialViewParameters\": {\r\n        \"yaw\": 0,\r\n        \"pitch\": 0,\r\n        \"fov\": 1.1479251634083179\r\n      },\r\n      \"linkHotspots\": [\r\n        {\r\n          \"yaw\": 0,\r\n          \"pitch\": 0,\r\n          \"rotation\": 0,\r\n          \"target\": \"17-dd001\"\r\n        }\r\n      ],\r\n      \"infoHotspots\": [],\r\n      \"position\": 1,\r\n      \"course\": \"dd\"\r\n    }\r\n  ],\r\n  \"name\": \"Local 1024tiles\"\r\n};\r\n",
+  "saveDate": "2026-05-19T04:24:59.327Z"
+}
