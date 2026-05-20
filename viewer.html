@@ -560,7 +560,8 @@ function enableAudioOnFirstGesture() {
   if (audioUnlockConsumed) return;
   audioUnlockConsumed = true;
   audioEnabled = true;
-  if (currentSceneObj) playSceneBGM(currentSceneObj.data.id, { force: true });
+  // 地図の BGMオフ（?bgm=0）を尊重。長押しの bgmForce とは別
+  if (currentSceneObj && shouldPlayBGM()) playSceneBGM(currentSceneObj.data.id);
 }
 document.addEventListener('click', enableAudioOnFirstGesture, { once: true });
 document.addEventListener('touchstart', enableAudioOnFirstGesture, { once: true, passive: true });
@@ -579,7 +580,7 @@ function toggleBGMPlayback() {
   } else {
     bgmPlaying = true;
     if (!bgmEnabled) bgmForce = true;
-    if (currentSceneObj) playSceneBGM(currentSceneObj.data.id, { force: true });
+    if (currentSceneObj && shouldPlayBGM()) playSceneBGM(currentSceneObj.data.id);
   }
 }
 
@@ -1835,10 +1836,9 @@ function sceneUsesCourseBgm(sceneData) {
   return !!(cb && sceneData.course && cb[sceneData.course]);
 }
 
-function playSceneBGM(sceneId, opts) {
-  var force = !!(opts && opts.force);
+function playSceneBGM(sceneId) {
   if (!audioEnabled) return;
-  if (!force && !shouldPlayBGM()) {
+  if (!shouldPlayBGM()) {
     stopAllBGM();
     return;
   }
