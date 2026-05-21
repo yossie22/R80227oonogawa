@@ -1,4 +1,3 @@
-// GENERATOR_HISTORY: [{"sceneId":"0-aa001","text":"観賞温室では、熱帯、亜熱帯の植物を1年中観賞できます。\nこの温室の暖房には、隣接する佐野清掃センターで発生する                                                ゴミ焼却余熱が利用されています。。","fontSize":16,"fontFamily":"'Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3',sans-serif","color":"#ffff00","pitch":1.44,"yaw":0.77},{"sceneId":"0-aa001","text":"観賞温室では、熱帯、亜熱帯の植物を1年中観賞できます。\nこの温室の暖房には、隣接する佐野清掃センターで発生するゴミ焼却余熱が利用されています。。","fontSize":17,"fontFamily":"'Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3',sans-serif","color":"#ffffff","pitch":-0.65,"yaw":-0.17},{"sceneId":"13-bb001","text":"鉢仕立てのブーゲンビリアが見事です！","fontSize":22,"fontFamily":"'Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3',sans-serif","color":"#ffffff","pitch":1.36,"yaw":-0.38},{"sceneId":"0-aa001","text":"観賞温室では、熱帯、亜熱帯の植物を1年中観賞できます。\nこの温室の暖房には、隣接する佐野清掃センターで発生するゴミ焼却余熱が利用されています。","fontSize":16,"fontFamily":"'Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3',sans-serif","color":"#ffffff","pitch":-0.44,"yaw":-0.38}]
 var APP_DATA = {
   "scenes": [
     {
@@ -501,26 +500,7 @@ var APP_DATA = {
       ],
       "infoHotspots": [],
       "position": 12,
-      "course": "aa",
-      "imageHotspots": [
-        {
-          "sceneStartId": "11-aa012",
-          "sourceScene": "11-aa012",
-          "src": "コルジリネ.png",
-          "width": 620,
-          "height": 620,
-          "yawCenter": 25,
-          "yawRange": 35,
-          "fadeTime": 2.5,
-          "dispTime": 12000,
-          "startHoldTime": 500,
-          "effect": "revealGrowSoft",
-          "resetDisplay": false,
-          "playVideoOnTap": true,
-          "videoSrc": "aa_test.mp4",
-          "videoLoop": false
-        }
-      ]
+      "course": "aa"
     },
     {
       "id": "12-aa013",
@@ -713,7 +693,26 @@ var APP_DATA = {
       ],
       "infoHotspots": [],
       "position": 1,
-      "course": "cc"
+      "course": "cc",
+      "imageHotspots": [
+        {
+          "sceneStartId": "16-cc001",
+          "sourceScene": "16-cc001",
+          "src": "aa011.png",
+          "width": 700,
+          "height": 700,
+          "yawCenter": 90,
+          "yawRange": 30,
+          "targetScene": "10-aa011",
+          "targetYaw": -2.007128639793479,
+          "targetPitch": 0,
+          "fadeTime": 5,
+          "dispTime": 5000,
+          "startHoldTime": 2500,
+          "effect": "grow",
+          "resetDisplay": false
+        }
+      ]
     },
     {
       "id": "17-dd001",
@@ -749,7 +748,26 @@ var APP_DATA = {
       ],
       "infoHotspots": [],
       "position": 1,
-      "course": "dd"
+      "course": "dd",
+      "imageHotspots": [
+        {
+          "sceneStartId": "17-dd001",
+          "sourceScene": "17-dd001",
+          "src": "aa012.png",
+          "width": 700,
+          "height": 700,
+          "yawCenter": -100,
+          "yawRange": 20,
+          "targetScene": "11-aa012",
+          "targetYaw": 1.5707963267948966,
+          "targetPitch": 0,
+          "fadeTime": 5,
+          "dispTime": 5000,
+          "startHoldTime": 2500,
+          "effect": "grow",
+          "resetDisplay": false
+        }
+      ]
     }
   ],
   "courseBgm": {
